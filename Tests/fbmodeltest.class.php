@@ -28,15 +28,15 @@ class FBModelTest extends PHPUnit_TestCase
 		$this->assertTrue($result == $expected);
 	}
 	function testGetName() {
-		$result = $this->m->getFbid();
+		$result = $this->m->getName();
 		$expected = 'A Name';
-		$this->assertTrue($result == $expected);
+		$this->assertTrue(strcmp($result, $expected) == 0);
 	}
 	function testSetName() {
-		$expected = 'Not a name';
-		$this->m->setName($expected);
+		$expected = 'Another Name';
+		$this->m->setName('Another Name');
 		$result = $this->m->getName();
-		$this->assertEquals($result, $expected);
+		$this->assertTrue(strcmp($result, $expected) == 0);
 	}
 }
 ?>
