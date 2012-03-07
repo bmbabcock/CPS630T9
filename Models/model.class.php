@@ -1,4 +1,4 @@
-<?php>
+<?php
 class Model {
 	private $id;
 	function __construct( $row ) {
@@ -14,3 +14,4 @@ class Model {
 		$this->id = $value;
 	}
 }
+?>

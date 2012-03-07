@@ -1,7 +1,5 @@
 <?php 
-
 require_once 'PHPUnit.php';
-
 class ModelTest extends PHPUnit_TestCase
 {
 	private $m;
@@ -29,4 +27,4 @@ class ModelTest extends PHPUnit_TestCase
 		$this->assertTrue($result == $expected);
 	}
 }
-	
+?>	
