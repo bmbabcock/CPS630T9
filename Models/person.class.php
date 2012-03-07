@@ -26,7 +26,7 @@ class Person extends Model{
 		$this-> dateCreated = $dateTime;
 	}
 	function getDateCreated(){
-		return $this->DateCreated;
+		return $this->dateCreated;
 	}
 }
 ?>
