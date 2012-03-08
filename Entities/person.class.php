@@ -1,12 +1,12 @@
 <?php
 /************************************************
-* 	Person - Extends fbmodel and stores any 	*
+* 	Person - Extends fbentity and stores any 	*
 *	information	that is unique for a person.	*
 *												*
 *	Author: Byron Babcock						*
 *	Date: 07/03/2012							*
 ************************************************/
-class Person extends Model{
+class Person extends FBEntity{
 	private $dateCreated;
 	/****************************************
 	*	Constructs the	Perons object.		*

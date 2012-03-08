@@ -1,17 +1,17 @@
 <?php
 /************************************************
-* 	FBModel - Extends model and stores any 		*
-*	information	that is common for all models	*
+* 	FBEntity - Extends entity and stores any 	*
+*	information	that is common for all entities	*
 *	loaded from fb								*
 *												*
 *	Author: Byron Babcock						*
 *	Date: 06/03/2012							*
 ************************************************/
-	class FBModel extends Model {
+	class FBEntity extends Entity {
 	private $fbid;
 	private $name;
 	/************************************
-	*	Constructs the	FBModel object.	*
+	*	Constructs the	FBEntity object.*
 	*									*
 	*	$row:	id - the databse id		*
 	*			fbid - the id from fb	*

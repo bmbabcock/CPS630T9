@@ -1,12 +1,12 @@
 <?php
 /************************************************
-* 	Lcoation - Extends fbmodel and stores any 	*
+* 	Lcoation - Extends fbentity and stores any 	*
 *	information	that is unique for a location.	*
 *												*
 *	Author: Byron Babcock						*
 *	Date: 06/03/2012							*
 ************************************************/
-class Location extends FBModel {
+class Location extends FBEntity {
 	/************************************
 	*	Constructs the location object.	*
 	*									*

@@ -1,17 +1,17 @@
 <?php
 require_once 'PHPUnit.php';
-class FBModelTest extends PHPUnit_TestCase
+class FBEntityTest extends PHPUnit_TestCase
 {
 	private $m;
 	
-	function FBModelTest($name){
+	function FBEntityTest($name){
 		$this->PHPUnit_TestCase($name);
 	}	
 	function setUp() {
 		$row = array('id' => 123,
 			'fbid' => 'facebook123',
 			'name' => 'A Name');
-		$this->m = new FBModel($row);
+		$this->m = new FBEntity($row);
 	}
 	function tearDown() {
 		unset($this->m);

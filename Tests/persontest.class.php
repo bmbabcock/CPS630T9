@@ -4,7 +4,7 @@ class PersonTest extends PHPUnit_TestCase
 {
 	private $m;
 	
-	function ModelTest($name){
+	function PersonTest($name){
 		$this->PHPUnit_TestCase($name);
 	}
 	private $dateCreated;

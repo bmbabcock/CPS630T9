@@ -2,19 +2,19 @@
 <BODY>
 
 <?php
-require_once '/Tests/modeltest.class.php';
-require_once '/Tests/fbmodeltest.class.php';
+require_once '/Tests/entitytest.class.php';
+require_once '/Tests/fbentitytest.class.php';
 require_once '/Tests/persontest.class.php';
-require_once '/Models/model.class.php';
-require_once '/Models/fbmodel.class.php';
-require_once '/Models/person.class.php';
+require_once '/Entities/entity.class.php';
+require_once '/Entities/fbentity.class.php';
+require_once '/Entities/person.class.php';
 require_once 'PHPUnit.php';
 
-$suite1 = new PHPUnit_TestSuite("ModelTest");
+$suite1 = new PHPUnit_TestSuite("EntityTest");
 $result = PHPUnit::run($suite1);
 echo $result -> toHTML();
 
-$suite2 = new PHPUnit_TestSuite("FBModelTest");
+$suite2 = new PHPUnit_TestSuite("FBEntityTest");
 $result = PHPUnit::run($suite2);
 echo $result -> toHTML();
 

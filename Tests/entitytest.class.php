@@ -1,16 +1,16 @@
 <?php 
 require_once 'PHPUnit.php';
-class ModelTest extends PHPUnit_TestCase
+class EntityTest extends PHPUnit_TestCase
 {
 	private $m;
 	
-	function ModelTest($name){
+	function EntityTest($name){
 		$this->PHPUnit_TestCase($name);
 	}
 	
 	function setUp() {
 		$row = array('id' => 123);
-		$this->m = new Model($row);
+		$this->m = new Entity($row);
 	}
 	function tearDown() {
 		unset($this->m);

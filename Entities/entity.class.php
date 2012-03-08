@@ -8,7 +8,7 @@
 *	Author: Byron Babcock						*
 *	Date: 06/03/2012							*
 ************************************************/
-class Model {
+class Entity {
 	private $id;
 	function __construct( $row ) {
 		if (is_array($row)){
