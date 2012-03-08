@@ -1,9 +1,8 @@
 
 <?php
 /************************************************
-* 	FBModel - Extends model and stores any 		*
-*	information	that is common for all models	*
-*	loaded from fb								*
+* 	Entity - Acts as a base class and stores	*
+*			the id for entities					*
 *												*
 *	Author: Byron Babcock						*
 *	Date: 06/03/2012							*
