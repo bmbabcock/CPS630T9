@@ -2,13 +2,14 @@
 <body>
 
 <?php
-require_once '/Tests/entitytest.class.php';
+/*require_once '/Tests/entitytest.class.php';
 require_once '/Tests/fbentitytest.class.php';
 require_once '/Tests/persontest.class.php';
 require_once '/Entities/entity.class.php';
 require_once '/Entities/fbentity.class.php';
-require_once '/Entities/person.class.php';
+require_once '/Entities/person.class.php';*/
 require_once 'PHPUnit.php';
+require_once 'autoinclude.inc.php';
 
 $suite1 = new PHPUnit_TestSuite("EntityTest");
 $result = PHPUnit::run($suite1);
