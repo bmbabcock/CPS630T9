@@ -1,5 +1,5 @@
-<HTML>
-<BODY>
+<html>
+<body>
 
 <?php
 require_once '/Tests/entitytest.class.php';
@@ -24,5 +24,5 @@ echo $result -> toHTML()
 
 ?>
 
-</BODY>
-</HTML>
+</body>
+</html>
