@@ -1,5 +1,11 @@
 <?php>
-
+/************************************************
+* 	Database- Makes queries safe and then sends	*
+*			them.  								*
+*												*
+*	Author: Byron Babcock						*
+*	Date: 15/03/2012							*
+************************************************/
 class Database{
 	private $connection;
 	public function __construct(){

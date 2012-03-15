@@ -1,4 +1,12 @@
 <?php
+/************************************************
+* 	Connection - Stores an active connection	*
+*			use getConnection which will		*
+*			reconnect automatically				*
+*												*
+*	Author: Byron Babcock						*
+*	Date: 15/03/2012							*
+************************************************/
 class Connection{
 		
 	private $connection;
