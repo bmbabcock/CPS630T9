@@ -1,9 +1,9 @@
 <?php>
 
 abstract class Controller(){
-	private $view;
-	private $arguments;
-	private $data;
+	protected $view;
+	protected $arguments;
+	protected $data;
 
 	function __construct($row){
 		$arguments = $row;
