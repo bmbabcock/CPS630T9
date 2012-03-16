@@ -18,8 +18,8 @@
 -- Create schema cps630
 --
 
-CREATE DATABASE IF NOT EXISTS cps630;
-USE cps630;
+CREATE DATABASE IF NOT EXISTS cps1;
+USE cps1;
 
 --
 -- Definition of table `checkins`
