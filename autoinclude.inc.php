@@ -1,4 +1,4 @@
-<?php>
+<?php
 define('ROOT_DIR', dirname(__FILE__).'/');
 
 function __autoload($className) {

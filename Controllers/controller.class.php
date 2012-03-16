@@ -1,4 +1,4 @@
-<?php>
+<?php
 
 abstract class Controller{
 	protected $view;
@@ -12,8 +12,9 @@ abstract class Controller{
 
 	abstract function loadData();
 	function render(){
+		$settings = new Settings();
 		if(isset($this->data)) expand($this->data);
-		include(Settings::ROOT_DIR . 'Views\\' . $view);
+		include($settings::$ROOT_DIR . 'Views\\' . $this->view);
 	}
 }
-<?>
+?>

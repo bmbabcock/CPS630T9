@@ -1,7 +1,8 @@
 <?php
-$app_id = Settings::APP_ID;
-$app_secret = Settings::APP_SECRET;
-$my_url = Settings::URL;
+$settings = new Settings;
+$app_id = $settings::$APP_ID;
+$app_secret = $settings::$APP_SECRET;
+$my_url = $settings::$URL;
 session_start();
 $code = $_REQUEST["code"];
 

@@ -1,11 +1,11 @@
-<?php>
+<?php
 
 
-abstract class UserAuthorizationController{
+class UserAuthorizationController extends Controller{
 
-	function __construct($row){
+	function __construct($row = null){
 		parent::__construct($row);
-		$this->view = 'userauthorizationview.inc.php'
+		$this->view = 'userauthorizationview.inc.php';
 	}
 		
 
@@ -13,4 +13,4 @@ abstract class UserAuthorizationController{
 		//TODO:Load anything needed here
 	}
 }
-<?>
+?>
