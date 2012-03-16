@@ -12,7 +12,7 @@ abstract class Controller{
 
 	abstract function loadData();
 	function render(){
-		expand($this->data);
+		if(isset($this->data)) expand($this->data);
 		include(Settings::ROOT_DIR . 'Views\\' . $view);
 	}
 }
