@@ -1,5 +1,6 @@
 <?php
-define('ROOT_DIR', dirname(__FILE__).'/');
+$settings = new Settings();
+define('ROOT_DIR', $settings::ROOT_DIR);
 
 function __autoload($className) {
     $folder=classFolder($className);
