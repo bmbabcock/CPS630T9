@@ -1,10 +1,12 @@
 <?php
 $settings = new Settings();
-define('ROOT_DIR', $settings::ROOT_DIR);
+define('ROOT_DIR', $settings::$ROOT_DIR);
 
 function __autoload($className) {
+	$className = strtolower($className);
     $folder=classFolder($className);
-    if($folder) require_once($folder.'/'.$className.'.class.php');
+	echo('Folder: ' . $folder);
+    if($folder) require_once(ROOT_DIR . $folder.'/'.$className.'.class.php');
 }
 
 function classFolder($className,$folder='') {
