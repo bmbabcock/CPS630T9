@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+
+<body>
+<div id="placesTable"></div>
+<script type="text/javascript">
+var x=document.getElementById("yourinfo");
+
+function getCheckins(position)
+{
+	
+	document.getElementById("placesTable").innerHTML='Loading';
+	var requestURL = 'https://graph.facebook.com/search?' +
+	'type=place&' + 
+	'center=' + position.coords.latitude + ',' + position.coords.longitude + '&' +
+	'distance=100&' +
+	'format=json&' +
+	'access_token=' + 'AAACEdEose0cBAJqVUxS2cagBbxmUcv2Mgttud1xH3uJ2YezZBXo2B0ZCE2b7fHtZBn4pOu6cZC4Q72bAvLbphhwngLquKkt0UZAEQZBiFpGAZDZD';//accessToken;
+	requestURL = encodeURI(requestURL);
+	var request = new XMLHttpRequest();
+	request.onreadystatechange=function(){
+		if(request.readyState==4 & request.status==200){
+			var test = request.responseText;
+			var places = JSON.parse(test);
+			generateTable(places.data);
+		}
+	}
+	request.open("GET", requestURL, true);
+	request.send();
+}
+function generateTable(places){
+	var tablehtml = '<table border="1">';
+	for (i = 0; i < places.length; i++){
+		tablehtml += '<tr><td>' + places[i].name + '</td></tr>';
+	}
+	tablehtml +='</table>';
+	document.getElementById("placesTable").innerHTML=tablehtml;
+}
+function getParams(){
+	var qs = window.location.search.substring(1);
+	var keyValuePairs = qs.split("&");
+	var params = {};
+	for( i = 0; i < keyValuePairs.length; i++){
+		var temp = keyValuePairs[i].split("=");
+		params[decodeURIComponent(temp[0])] = decodeURIComponent(temp[1]);
+	}
+	return params;
+}
+
+var params = getParams();
+var accessToken = params["access_token"];
+if (navigator.geolocation)
+{
+	navigator.geolocation.getCurrentPosition(getCheckins);
+}
+else{x.innerHTML="Geolocation is not supported by this browser.";}
+	
+</script>
+</body>
+</html>
