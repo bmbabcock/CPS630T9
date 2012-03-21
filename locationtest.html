@@ -19,6 +19,7 @@ function search(){
 	'access_token=' + accessToken;
 	loadPlaces(searchURL);	
 }
+var pos;
 function getPlaces(position){
 	var dist;
 	if (position.coords.accuracy > 1000) dist = position.coords.accuracy;
@@ -31,6 +32,7 @@ function getPlaces(position){
 	'limit=25&' + 
 	'format=json&' +
 	'access_token=' + accessToken;
+	pos = position;
 	loadPlaces(requestURL);
 }
 function loadPlaces(requestURL){
@@ -133,7 +135,20 @@ function createNavigationButtons(place){
 	document.getElementById("navigationDiv").innerHTML = navigationhtml;
 }
 function checkIn(event){
-
+	var target = getTarget(event);
+	var request = new XMLHttpRequest();
+	request.onreadystatechange=function(){
+		if(request.readyState==4 & request.status==200){
+			alert("Checkin successful.");
+		}
+	}
+	var url = 'https://graph.facebook.com/me/checkins?access_token=' + accessToken;
+	
+	url = encodeURI(url);
+	var coords = '{ "latitude": ' + pos.coords.latitude + ', "longitude": ' + pos.coords.longitude + '}';
+	
+	request.open("POST",url,true);
+	request.send('place=' + target.value + '&coordinates=' + coords);
 }
 function backToPlaces(){
 	document.getElementById("mainDiv").innerHTML = placeshtml;
@@ -162,7 +177,7 @@ function getParams(){
 var params = getParams();
 var accessToken = params["access_token"];
 //TODO: remove to deploy
-accessToken = 'AAAClmlH1KvYBADIZBsoNfCMOOD0VXCaPI2tebZBaaJWgeLyv8BzjY9ZCZA8OuRFGdqrP4pcmG6Mx5jZCDPcTpn0BbdREFYGR6M7mfWqgZCpgZDZD';
+accessToken = 'AAACEdEose0cBANYW6hv7VTKdLQZB8312aCU63mgKHakZAWGySKYAUfCF664ZAoxtULdt0ZBBFeR3HmDedGGZAgXpGRX4TzP6WKgyZB2CyiNwZDZD';
 if (navigator.geolocation)
 {
 	navigator.geolocation.getCurrentPosition(getPlaces);
