@@ -1,189 +1,134 @@
 <!DOCTYPE html>
 <html>
-<head>
-</head>
-
-<body>
-<div id="searchBar">
-	<input type="text" id="searchText" value="address or name"></input>
-	<button type="button" onclick="search()" value="search button">Search</button>
-</form> 
-</div>
-<div id="mainDiv" style="position:relative;" ></div>
-<div id="navigationDiv"></div>
-<script type="text/javascript">
-function search(){
-	var searchURL = 'https://graph.facebook.com/search?q=' +
-	document.getElementById("searchText").value + '&' +
-	'type=place&' + 
-	'access_token=' + accessToken;
-	loadPlaces(searchURL);	
-}
-var pos;
-function getPlaces(position){
-	var dist;
-	if (position.coords.accuracy > 1000) dist = position.coords.accuracy;
-	else dist = 1000;
-	document.getElementById("mainDiv").innerHTML='Loading';
-	var requestURL = 'https://graph.facebook.com/search?' +
-	'type=place&' + 
-	'center=' + position.coords.latitude + ',' + position.coords.longitude + '&' +
-	'distance=' + dist + '&' +
-	'limit=25&' + 
-	'format=json&' +
-	'access_token=' + accessToken;
-	pos = position;
-	loadPlaces(requestURL);
-}
-function loadPlaces(requestURL){
-	requestURL = encodeURI(requestURL);
-	var request = new XMLHttpRequest();
-	request.onreadystatechange=function(){
-		if(request.readyState==4 & request.status==200){
-			var test = request.responseText;
-			var places = JSON.parse(test);
-			generateTable(places.data);
-			generatePaging(places.paging);
-		}
-	}
-	request.open("GET", requestURL, true);
-	request.send();
-}
-function generatePaging(pageLinks){
-	if(pageLinks){
-		var next = pageLinks.next;
-		var prev = pageLinks.previous;
-		var paginghtml = "";
-		if(prev){
-			prev += 'access_token=' + accessToken;
-			paginghtml += '<button type="button" onclick="loadNewPlaces(event)" value="' + prev + '">Previous</button>';
-		}
-		if(next){
-			next += 'access_token=' + accessToken;
-			paginghtml += '<button type="button" onclick="loadNewPlaces(event)" value="' + next + '">Next</button>';
-		}
-	document.getElementById("navigationDiv").innerHTML = paginghtml;
-	}
-}
-function loadNewPlaces(event){
-	var target = getTarget(event);
-	loadPlaces(target.value);
-}
-function getTarget(event){
-	var target;
-	if (!event) var event = window.event;
-	if (event.target) target = event.target;
-	else if (event.srcElement) target = event.srcElement;
-	if (target.nodeType == 3) // defeat Safari bug
-		target = target.parentNode;
-	return target;
-}
-function generateTable(places){
-	var listhtml = '';
-	for (i = 0; i < places.length; i++){
-		listhtml += '<div style="height:50px;padding:10px" id="placeRow' + i + '" onclick="handleClick(event)" title=' + places[i].id + '>' + places[i].name + '</div>';
-	}
-	document.getElementById("mainDiv").innerHTML=listhtml;
-	for (i = 0; i < places.length; i++){
-		generateRow(places[i], i);
-	}
-}
-function handleClick(event){
-	var target = getTarget(event);
-	getPlaceInfo(target.title);
-}
-
-function getPlaceInfo(id){
-	var requestURL = 'https://graph.facebook.com/' + id;
-	requestURL = encodeURI(requestURL);
-	var request = new XMLHttpRequest();
-	request.onreadystatechange=function(){
-		if(request.readyState==4 & request.status==200){
-			var place = request.responseText;
-			place = JSON.parse(place);
-			generatePlaceInfo(place);
-			createNavigationButtons(place);
-		}
-	}
-	request.open("GET", requestURL, true);
-	request.send();
-}
-var placeshtml;
-var paginghtml;
-function generatePlaceInfo(place){
-	var mainhtml = '<div id="basicInfo" style="position:static;" >';
-	mainhtml += '<img style="position:static;" src="https://graph.facebook.com/' + place.id + '/picture?type=normal"/>';
-	mainhtml += '<h1 style="font-size:20px;position:absolute;left:120px;top:0px">' + place.name + '</h1>';
-	var addresshtml = '';
-	if(place.location.street)
-		mainhtml += '<p style="font-size:15px;position:absolute;left:120px;top:30px;">' + place.location.street + '</p>';
-	mainhtml += '<p style="font-size:15px;position:absolute;left:120px;top:50px;">' 
-	if(place.location.city) mainhtml += place.location.city + ', ';
-	if(place.location.state) mainhtml += place.location.state + ', ';
-	if(place.location.country) mainhtml += place.location.country;
-	mainhtml += '</p></div><div id="details" style="position:static;" >';
-	mainhtml += '<p style="font-size:18px;">' + place.description + '</p>';
-	mainhtml += '</div>';
-	placeshtml = document.getElementById("mainDiv").innerHTML;
-	document.getElementById("mainDiv").innerHTML = mainhtml;
-}
-function createNavigationButtons(place){
-	var navigationhtml = "";
-	navigationhtml += '<button type="button" onclick="backToPlaces()">Back</button>';
-	navigationhtml += '<button type="button" onclick="checkIn(event)" value="' + place.id + '">Check In</button>';
-	paginghtml = document.getElementById("navigationDiv").innerHTML;
-	document.getElementById("navigationDiv").innerHTML = navigationhtml;
-}
-function checkIn(event){
-	var target = getTarget(event);
-	var request = new XMLHttpRequest();
-	request.onreadystatechange=function(){
-		if(request.readyState==4 & request.status==200){
-			alert("Checkin successful.");
-		}
-	}
-	var url = 'https://graph.facebook.com/me/checkins?access_token=' + accessToken;
-	
-	url = encodeURI(url);
-	var coords = '{ "latitude": ' + pos.coords.latitude + ', "longitude": ' + pos.coords.longitude + '}';
-	
-	request.open("POST",url,true);
-	request.send('place=' + target.value + '&coordinates=' + coords);
-}
-function backToPlaces(){
-	document.getElementById("mainDiv").innerHTML = placeshtml;
-	document.getElementById("navigationDiv").innerHTML = paginghtml;
-}
-function generateRow(place, rowIndex){
-	var row = document.getElementById('placeRow' + rowIndex);
-	var rowhtml = "";
-	rowhtml += '<img src="https://graph.facebook.com/' + place.id + '/picture?type=square"/>';//'<img src="' + place.picture + '" width="50px" height="50px"/>';
-	rowhtml += '<h1 style="font-size:20px;position:relative;right:-70px;top:-70px;">' + place.name + '</h1>';
-	if(place.location.street)
-		rowhtml += '<p style="font-size:15px;position:relative;right:-70px;top:-75px;">' + place.location.street + '</p>';
-	row.innerHTML = rowhtml;
-}
-function getParams(){
-	var qs = window.location.search.substring(1);
-	var keyValuePairs = qs.split("&");
-	var params = {};
-	for( i = 0; i < keyValuePairs.length; i++){
-		var temp = keyValuePairs[i].split("=");
-		params[decodeURIComponent(temp[0])] = decodeURIComponent(temp[1]);
-	}
-	return params;
-}
-
-var params = getParams();
-var accessToken = params["access_token"];
-//TODO: remove to deploy
-accessToken = 'AAACEdEose0cBANYW6hv7VTKdLQZB8312aCU63mgKHakZAWGySKYAUfCF664ZAoxtULdt0ZBBFeR3HmDedGGZAgXpGRX4TzP6WKgyZB2CyiNwZDZD';
-if (navigator.geolocation)
-{
-	navigator.geolocation.getCurrentPosition(getPlaces);
-}
-else{x.innerHTML="Geolocation is not supported by this browser.";}
-	
-</script>
-</body>
+	<head>
+	</head>
+	<body>
+		<div id="searchBar">
+			<input type="text" id="searchText" value="address or name"></input>
+			<button type="button" onclick="search()" value="search button">Search</button> 
+		div>
+		<div id="mainDiv" style="position:relative;" ></div>
+		<div id="navigationDiv"></div>
+		<script type="text/javascript">
+			function getParams(){
+				var qs = window.location.search.substring(1);
+				var keyValuePairs = qs.split("&");
+				var params = {};
+				for( i = 0; i < keyValuePairs.length; i++){
+					var temp = keyValuePairs[i].split("=");
+					params[decodeURIComponent(temp[0])] = decodeURIComponent(temp[1]);
+				}
+				return params;
+			}
+			var params = getParams();
+			var accessToken = params["access_token"];
+			var searchType = params["search_type"];
+			//TODO: remove to deploy
+			accessToken = 'AAACEdEose0cBAEhzbNyLiQfKT6n4PQf59S2523tVDSwNqyGnfJZBL2x3ZADxN39MDbJSn4vir0IZAJCPWzkgxl6Ykg8ZA0B1gSuXHpBLVwZDZD';
+			function search(){
+				var searchURL = 'https://graph.facebook.com/search?q=' +
+				document.getElementById("searchText").value + '&' +
+				'type=place&' + 
+				'access_token=' + accessToken;
+				loadPlaces(searchURL);	
+			}
+			var pos;
+			function getPlaces(position){
+				var dist;
+				if (position.coords.accuracy > 1000) dist = position.coords.accuracy;
+				else dist = 1000;
+				document.getElementById("mainDiv").innerHTML='Loading';
+				var requestURL = 'https://graph.facebook.com/search?' +
+				'type=place&' + 
+				'center=' + position.coords.latitude + ',' + position.coords.longitude + '&' +
+				'distance=' + dist + '&' +
+				'limit=25&' + 
+				'format=json&' +
+				'access_token=' + accessToken;
+				pos = position;
+				loadPlaces(requestURL);
+			}
+			function loadPlaces(requestURL){
+				requestURL = encodeURI(requestURL);
+				var request = new XMLHttpRequest();
+				request.onreadystatechange=function(){
+					if(request.readyState==4 & request.status==200){
+						var test = request.responseText;
+						var places = JSON.parse(test);
+						generateTable(places.data);
+						generatePaging(places.paging);
+					}
+				}
+				request.open("GET", requestURL, true);
+				request.send();
+			}
+			function generatePaging(pageLinks){
+				if(pageLinks){
+					var next = pageLinks.next;
+					var prev = pageLinks.previous;
+					var paginghtml = "";
+					if(prev){
+						prev += 'access_token=' + accessToken;
+						paginghtml += '<button type="button" onclick="loadNewPlaces(event)" value="' + prev + '">Previous</button>';
+					}
+					if(next){
+						next += 'access_token=' + accessToken;
+						paginghtml += '<button type="button" onclick="loadNewPlaces(event)" value="' + next + '">Next</button>';
+					}
+				document.getElementById("navigationDiv").innerHTML = paginghtml;
+				}
+			}
+			function loadNewPlaces(event){
+				var target = getTarget(event);
+				loadPlaces(target.value);
+			}
+			function getTarget(event){
+				var target;
+				if (!event) var event = window.event;
+				if (event.target) target = event.target;
+				else if (event.srcElement) target = event.srcElement;
+				if (target.nodeType == 3) // defeat Safari bug
+					target = target.parentNode;
+				return target;
+			}
+			function generateTable(data){
+				var listhtml = '';
+				for (i = 0; i < data.length; i++){
+					listhtml += '<div style="height:50px;padding:10px" id="placeRow' + i + '" onclick="handleClick(event)" title=' + data[i].id + '>' + data[i].name + '</div>';
+				}
+				document.getElementById("mainDiv").innerHTML=listhtml;
+				for (i = 0; i < data.length; i++){
+					generateRow(data[i], i);
+				}
+			}
+			function handleClick(event){
+				//TODO: Handle click
+			}
+			function generateRow(data, rowIndex){
+				if(searchType == 'places'){
+					var row = document.getElementById('placeRow' + rowIndex);
+					var rowhtml = "";
+					rowhtml += '<img src="https://graph.facebook.com/' + data.id + '/picture?type=square"/>';
+					rowhtml += '<h1 style="font-size:20px;position:relative;right:-70px;top:-70px;">' + data.name + '</h1>';
+					if(data.location.street)
+						rowhtml += '<p style="font-size:15px;position:relative;right:-70px;top:-75px;">' + data.location.street + '</p>';
+					row.innerHTML = rowhtml;
+				}
+				else if(searchType == 'matches'){
+					//TODO: add matches display here
+				}
+			}
+			if(searchType == 'places'){
+				if (navigator.geolocation){
+					navigator.geolocation.getCurrentPosition(getPlaces);
+				}
+				else{
+					document.getElementById("mainDiv").innerHTML="Geolocation is not supported by this browser.";
+				}
+			}
+			else if(searchType == 'matches'){
+				//TODO: add matches search here
+			}
+		</script>
+	</body>
 </html>

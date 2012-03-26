@@ -9,18 +9,54 @@
 			<h2 id="headerLine1" style="font-size:15px;position:absolute;left:120px;top:20px;"></h2>
 			<h2 id="headerLine2" style="font-size:15px;position:absolute;left:120px;top:40px;"></h2>
 		</div>
+		<div id="details" style="position:static;" >';
+			<p id="detailsBody" style="font-size:18px;"></p>;
+		</div>
 		<script type="text/javascript">
-			var access_token = 'AAAClmlH1KvYBAB8FEFVai2s8FI7xuBa0BY6E48ZAuZBb1kihcBZC8VLKq4O4d4dFBFr9ZBZC4FoXlkbEtBfoZAOlkV8x7XEmKA1rcr9NpPeAZDZD';
 			function loadData(page){
 				document.getElementById("pagePicture").src = 'https://graph.facebook.com/' + page.id + '/picture?type=normal';
 				document.getElementById("name").innerHTML = page.name;
-				if(page.type.equals('user')){
-					document.getElementById("headerLine1").innerHTML = page.education[0].school.name;
-					document.getElementById("headerLine2").innerHTML = page.education[0].concentration[0].name;
+				if(page.type == 'user'){
+					document.getElementById("headerLine1").innerHTML = page.location.name;
+				}
+				else if(page.type == 'page'){
+					var locationLine1 = '';
+					if(page.location.street) locationLine1 += page.location.street;
+					var locationLine2 = '';
+					if(page.location.city) locationLine2 += page.location.city + ', ';
+					if(page.location.state) locationLine2 += page.location.state + ', ';
+					if(page.location.country) locationLine2 += page.location.country;
+					document.getElementById("headerLine1").innerHTML = locationLine1;
+					document.getElementById("headerLine2").innerHTML = locationLine2;
+					if(page.description) document.getElementById("detailsBody").innerhtml = page.details;
 				}
 			}
-			id = 509218378;
-			requestURL = 'https://graph.facebook.com/' + id + '?access_token=' + access_token;
+			function checkIn(event){
+				var target = getTarget(event);
+				var request = new XMLHttpRequest();
+				request.onreadystatechange=function(){
+					if(request.readyState==4 & request.status==200){
+						alert("Checkin successful.");
+					}
+				}
+				var url = 'https://graph.facebook.com/me/checkins?access_token=' + accessToken;
+				var coords = '{ "latitude": ' + pos.coords.latitude + ', "longitude": ' + pos.coords.longitude + '}';
+				request.open("POST",url,true);
+				request.send('place=' + target.value + '&coordinates=' + coords);
+			}
+			function createNavigationButtons(place){
+				var navigationhtml = "";
+				navigationhtml += '<button type="button" onclick="backToPlaces()">Back</button>';
+				navigationhtml += '<button type="button" onclick="checkIn(event)" value="' + place.id + '">Check In</button>';
+				paginghtml = document.getElementById("navigationDiv").innerHTML;
+				document.getElementById("navigationDiv").innerHTML = navigationhtml;
+			}
+			function backToPlaces(){
+				//TODO: go back
+			}
+			var access_token = 'AAACEdEose0cBAI0EN4FOHBIw7ZCr8ZAvgiiee7iCjmhmxoMzFrPOS0bnRpuYy3IX6pX2z18EK3UV4JGI7DH8cyviRyAHY5la9PP1xlAgZDZD';
+			id = 162717943739448;
+			requestURL = 'https://graph.facebook.com/' + id + '?access_token=' + access_token + '&metadata=1';
 			requestURL = encodeURI(requestURL);
 			var request = new XMLHttpRequest();
 			request.onreadystatechange=function(){
@@ -30,8 +66,8 @@
 					loadData(place);
 				}
 			}
-	request.open("GET", requestURL, true);
-	request.send();
+			request.open("GET", requestURL, true);
+			request.send();
 		</script>
 	</body>
 </html>
