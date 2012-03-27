@@ -11,10 +11,9 @@ include 'postLoginInfo.php'?>
    
 	<!-- this div required by fb I believe -->
 	<div id="fb-root"></div>
-	<?php
-	include(mainpage.html);?>
-	<script type="text/javascript">
 	
+	<script type="text/javascript">
+	<iframe src='mainpage.html?access_token=<?php$_SESSION["accesstoken"]?>'></iframe>
 	//Load sdk
 	(function(d){
         var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
