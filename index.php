@@ -11,7 +11,8 @@ include 'postLoginInfo.php'?>
    
 	<!-- this div required by fb I believe -->
 	<div id="fb-root"></div>
-	
+	<?php
+	include(mainpage.html);?>
 	<script type="text/javascript">
 	
 	//Load sdk
