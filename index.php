@@ -13,7 +13,7 @@ include 'postLoginInfo.php'?>
 	<div id="fb-root"></div>
 	
 	<script type="text/javascript">
-	<iframe src='mainpage.html?access_token=<?php$_SESSION["accesstoken"]?>'></iframe>
+	<iframe src='mainpage.html?access_token=<?php $_SESSION["accesstoken"] ?>'></iframe>
 	//Load sdk
 	(function(d){
         var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
