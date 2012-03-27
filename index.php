@@ -11,7 +11,7 @@ include 'postLoginInfo.php'?>
    
 	<!-- this div required by fb I believe -->
 	<div id="fb-root"></div>
-	<iframe src='mainpage.html?access_token=<?php $_SESSION["accesstoken"] ?>'></iframe>
+	<div id="mainDiv"></div>
 	
 	<script type="text/javascript">
 	//Load sdk
@@ -115,6 +115,8 @@ function doAction(){
 	var lname=document.getElementById('hidden-ln-field').value;
 	var fbid=document.getElementById("hidden-fi-field").value;
 	var accesstoken=document.getElementById('hidden-at-field').value;
+	
+	document.getElementById("mainDiv").innerHTML = "<iframe src='mainpage.html?access_token=" + accesstoken + "'></iframe>";
 	
 	var req = getXHR();
 		
