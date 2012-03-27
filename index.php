@@ -115,8 +115,7 @@ function doAction(){
 	var lname=document.getElementById('hidden-ln-field').value;
 	var fbid=document.getElementById("hidden-fi-field").value;
 	var accesstoken=document.getElementById('hidden-at-field').value;
-	
-	document.getElementById("mainDiv").innerHTML = "<iframe src='mainpage.html?access_token=" + accesstoken + "'></iframe>";
+	document.getElementById("mainDiv").innerHTML = "<iframe width='90%' height='90%' src='mainpage.html?access_token=" + accesstoken + "'></iframe>";
 	
 	var req = getXHR();
 		
