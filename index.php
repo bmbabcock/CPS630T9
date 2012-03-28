@@ -78,7 +78,7 @@ include 'postLoginInfo.php'?>
 				} 	
 			},
 			//Scope of extra user information needed
-			{scope: 'user_checkins, user_location'});
+			{scope: 'user_checkins, user_location, publish_checkins'});
         });
 		
 		//On click listeners for login link
