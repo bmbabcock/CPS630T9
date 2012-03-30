@@ -4,14 +4,235 @@
 	</head>
 	<body>
 	<div id="searchBar">
-	<input type="text" id="searchText" value="address or name"></input>
-	<button type="button" onclick="search()" value="search button">Search</button>
-</form> 
-</div>
-<div id="mainDiv" style="position:relative;" ></div>
-<div id="navigationDiv"></div>
-<!-- Utility Functions -->
+		<input type="text" id="searchText" value="address or name"></input>
+		<button type="button" onclick="search()" value="search button">Search</button>
+	</div>
+	<div id="place" style="position:relative;" ></div>
+	<div id="placeList" style="position:relative;" ></div>
+	<div id="match" style="position:relative;" ></div>
+	<div id="matchList" style="position:relative;" ></div>
+	<div id="navigationDiv"></div>
 <script type="text/javascript">
+function LocationManager(){
+	this.latitude = 0;
+	this.longitude = 0;
+	this.accuracy = -1;
+}
+/**
+* Finds the user's location and calls an event handler once found.
+* @param {function} The event handler to call
+*/
+LocationManager.prototype.updateLocation = function(responseHandler){
+	lm = this;
+	if (navigator.geolocation){
+		navigator.geolocation.getCurrentPosition(function(position){
+			lm.latitude = position.coords.latitude;
+			lm.longitude = position.coords.longitude;
+			lm.accuracy = position.coords.accuracy;
+			responseHandler();
+		});
+		return true;
+	}
+	else{
+		return false;
+	}
+};
+/**
+* Returns the users location as a string representing a JSON object.  This method does not update the location so call update first if required.
+*/
+LocationManager.prototype.locationAsJSONString = function(){
+	'{ "latitude": ' + this.latitude + ', "longitude": ' + this.longitude + '}';
+};
+function FacebookHandler(token, lManager){
+	this.accessToken = token;
+	this.locationManager = lManager;
+	this.place = -1;
+}
+/**
+* Sends a GET request to Facebook, parses the JSON response and calls the provided handler.  Can accept any number of additional arguments which will be passed to the handler.
+* @param {string}  The url for the request.
+* @param {function} The function to handle the response.  "none" may be specified if the response is not required.
+*/
+FacebookHandler.prototype.sendGet = function(requestURL, responseHandler){
+	if(requestURL.indexOf('?') != -1 ) requestURL += '&access_token=' + this.accessToken;
+	else requestURL += '?access_token=' + this.accessToken;
+	requestURL = encodeURI(requestURL);
+	var request = new XMLHttpRequest();
+	request.onreadystatechange=function(){
+		if(request.readyState==4 & request.status==200){
+			if(responseHandler != "none"){
+				var response = JSON.parse(request.responseText);
+				responseHandler(response);
+			}
+		}
+	}
+	request.open("GET", requestURL, true);
+	request.send();
+};
+/**
+* Sends a POST request to Facebook, parses the JSON response and calls the provided handler.  Can accept any number of additional arguments which will be passed to the handler.
+* @param {string}  The encoded URL.
+* @param {string}  The encoded data to be sent.
+* @param {function} The function to handle the response.  "none" may be specified if the response is not required.
+*/
+FacebookHandler.prototype.sendPost = function(requestURL, requestData, responseHandler){
+	if(requestURL.indexOf('?') != -1) requestURL += '&access_token=' + this.accessToken;
+	else requestURL += '?access_token=' + this.accessToken;
+	requestURL = encodeURI(requestURL);
+	var request = new XMLHttpRequest();
+	request.onreadystatechange=function(){
+		if(request.readyState==4 & request.status==200){
+			if(responseHandler != "none"){
+				var response = JSON.parse(request.responseText);
+				responseHandler(response);
+			}
+		}
+	}
+	request.open("POST", requestURL, true);
+	request.send(requestData);
+};
+/**
+* Checks a user in to a place
+* @param {event} The event which led to this call
+*/
+FacebookHandler.prototype.checkIn = function(event){
+	var target = getTarget(event);
+	this.place = target.value;
+	this.lacationManager.updateLocation(sendCheckIn);
+};
+/**
+* Prepares the data to checkin the user and then sends the call
+* @param {object} The position object representing the user's location
+* @param {array} An array with the place id at position 1
+*/
+FacebookHandler.prototype.sendCheckIn = function(position){
+	var url = 'https://graph.facebook.com/me/checkins';
+	var coords = this.locationManager.locationAsJSONString();
+	var data = 'place=' + this.place + '&coordinates=' + coords; 
+	this.sendPost(url, data, "none");	
+};
+/**
+* Sends a get request to facebook for a page
+* @param {string} The id of the page to retrieve
+* @param {function} The funciton to handle the response
+*/
+FacebookHandler.prototype.getPage = function(id, responseHandler){
+	var url = 'https://graph.facebook.com/id';
+	this.sendGet(url, responseHandler);
+};	
+/**
+* Performs a search for pages and updates the display with the new locations
+* @param {function} the function to handle the response
+* @param {string} the query for the string, defaults to the text in the search box
+* @param {string} the type of page to search for, use 'all' to find all pages
+*/
+FacebookHandler.prototype.searchPages = function(responseHandler, query, type){
+	query = typeof query !== 'undefined' ? query : document.getElementById("q=searchText").value;
+	type = typeof type !== 'undefined' ? type : 'place';
+	var searchURL = 'https://graph.facebook.com/search?' +query;
+	if(type != 'all') searchURL += '&' + 'type=' + type;
+	this.sendGet(searchURL, responseHandler);	
+};
+/**
+* Performs a search for nearby places
+* @param {function} the function to handle the response
+*/
+FacebookHandler.prototype.findNearbyPlaces = function(responseHandler){
+	var dist;
+	if (this.locationManager.accuracy >= 50) dist = this.locationManager.accuracy;
+	else dist = 50;
+	var query = 'center=' + this.locationManager.latitude + ',' + this.locationManager.longitude + '&' +
+	'distance=' + dist + '&' +
+	'limit=25&' + 
+	'format=json&';
+	this.searchPages(responseHandler, query);
+};
+
+function View(dMap, viewDiv){
+	this.visible = false;
+	
+}
+View.prototype.hide = function(){
+	this.visible = false;
+	this.div.style.display = 'none';
+};
+View.prototype.show = function(){
+	this.visible = true;
+	this.div.style.display = 'block';
+};
+function RowView(dMap, viewDiv){
+	View.call(this);
+	this.dataMap = dMap;
+	this.div = viewDiv;
+}
+RowView.prototype = new View();
+RowView.prototype.constructor = RowView;
+/**
+* Generates a row in the table
+* @param {object} A json object containing the item to represent
+* @param {array} An associative array used to map the information to the HTML elements.  Must contain values for id, title, details in a format accepted by getStringFromJson.
+* @param {int} The index of the item being added to the view
+*/
+RowView.prototype.populate = function(data){
+	var rowhtml = '<img src="https://graph.facebook.com/' + getValueFromJson(data, this.dataMap["id"]) + '/picture?type=square"/>';
+	rowhtml += '<h1 style="font-size:20px;position:relative;right:-70px;top:-70px;">' + getValueFromJson(data,this.dataMap["title"]) + '</h1>';
+	rowhtml += '<p style="font-size:15px;position:relative;right:-70px;top:-75px;">' + getValueFromJson(data,this.dataMap["details"]) + '</p>';
+	this.div.innerHTML = rowhtml;
+};
+function ListView(dMap, viewDiv){
+	View.call(this);
+	this.dataMap = dMap;
+	this.div = viewDiv;
+	this.rows = new Array();
+	this.onItemClick = new function(event){};
+}
+ListView.prototype = new View();
+ListView.prototype.constructor = ListView;
+/**
+* Generates the table to be populated with information.  Then calls generateRow to poulate each row.
+* @param {array} A json array containing each item to be added to the view
+* @param {array} An associative array used to map the information to the HTML elements.  Must contain values for id, title, details in a format accepted by getStringFromJson.
+*/
+ListView.prototype.populate = function(data){
+	data = data.data;
+	for (i = 0; i < data.length; i++){
+		this.div.innerHTML += '<div style="height:50px;padding:10px" id="placeRow' + i + '" onclick="onItemClick(event)" title=' + data[i].id + '>' + data[i].name + '</div>';
+		var newRow = new RowView(this.dataMap, document.getElementById("placeRow" + i));
+		this.rows[i] = newRow; 
+	}
+	for (i = 0; i < data.length ; i++){
+		this.rows[i].populate(data[i]);
+	}
+};
+function PageView(dMap, viewDiv){
+	View.call(this);
+	this.dataMap = dMap;
+	this.div = viewDiv;
+}
+PageView.prototype = new View();
+PageView.prototype.constructor = PageView;
+/**
+* Creates the page view with the information from data
+* @param {object} The data to be presented in a JSON object
+*/
+PageView.prototype.populate = function(data){
+	var mainhtml = '<div id="basicInfo" style="position:static;" >';
+	mainhtml += '<img style="position:static;" src="https://graph.facebook.com/' + getValueFromJson(data, this.dataMap["id"]) + '/picture?type=normal"/>';
+	mainhtml += '<h1 style="font-size:20px;position:absolute;left:120px;top:0px">' + getValueFromJson(data, this.dataMap["name"]) + '</h1>';
+	mainhtml += '<p style="font-size:15px;position:absolute;left:120px;top:30px;">' + getStringFromJson(data, this.dataMap["hLine1"]) + '</p>';
+	mainhtml += '<p style="font-size:15px;position:absolute;left:120px;top:50px;">' 
+	mainhtml += '<p style="font-size:15px;position:absolute;left:120px;top:50px;">' + getStringFromJson(data, this.dataMap["hLine2"]) + '</p></div>'
+	mainhtml += '<div id="details" style="position:static;" >';
+	mainhtml += '<p style="font-size:18px;">' + getStringFromJson(data, this.dataMap["details"]) + '</p>';
+	mainhtml += '</div>';
+	this.div.innerHTML = mainhtml;
+}
+<!-- Utility Functions -->
+/**
+* Gets the target of an event
+* @param {Event} The event to find the target of
+* @returns {Dom Object} The Dom Object that is the target
+*/
 function getTarget(event){
 	var target;
 	if (!event) var event = window.event;
@@ -21,6 +242,10 @@ function getTarget(event){
 		target = target.parentNode;
 	return target;
 }
+/**
+* Gets the parameters from the page url
+* @returns {array} An associative array of all parameters
+*/
 function getParams(){
 	var qs = window.location.search.substring(1);
 	var keyValuePairs = qs.split("&");
@@ -31,49 +256,12 @@ function getParams(){
 	}
 	return params;
 }
-function findLocation(eventHandler){
-	var args = arguments;
-	if (navigator.geolocation){
-		navigator.geolocation.getCurrentPosition(
-			function(position){
-				eventHandler(position, args);
-			});
-		return true;
-	}
-	else{
-		return false;
-	}
-}
-function getFacebook(requestURL, responseHandler){
-	var args = arguments;
-	requestURL = encodeURI(requestURL);
-	var request = new XMLHttpRequest();
-	request.onreadystatechange=function(){
-		if(request.readyState==4 & request.status==200){
-			if(responseHandler != "none"){
-				var response = JSON.parse(request.responseText);
-				responseHandler(response, args);
-			}
-		}
-	}
-	request.open("GET", requestURL, true);
-	request.send();
-}
-function postFacebook(requestURL, requestData, responseHandler){
-	var args = arguments;
-	requestURL = encodeURI(requestURL);
-	var request = new XMLHttpRequest();
-	request.onreadystatechange=function(){
-		if(request.readyState==4 & request.status==200){
-			if(responseHandler != "none"){
-				var response = JSON.parse(request.responseText);
-				responseHandler(response, args);
-			}
-		}
-	}
-	request.open("POST", requestURL, true);
-	request.send(requestData);
-}
+/**
+* Gets a value from a JSON Object
+* @param {Object} The JSON Object to retrieve a value from.
+* @param {string} The string to access the data with.  Can include periods to access data whithin sub objects.
+* @returns {any} Returns the data found using hte string
+*/
 function getValueFromJson(jObject, accessString){
 	if (accessString == "blank") return "";
 	var accessors = accessString.split( "." );
@@ -83,6 +271,12 @@ function getValueFromJson(jObject, accessString){
 	}
 	return retval;
 }
+/**
+* Gets a string from a JSON Object.  Example accessString: "location.city+'anytext'+..."
+* @param {Object} The JSON Object to retrieve a value from.
+* @param {string} The string to access and format the data.  Can include periods to access data whithin sub objects as well as strings to be added to the result in single quotes.  All pieces, accessors and strings should be seperated by a + sign.
+* @returns {any} Returns the string generated
+*/
 function getStringFromJson(jObject, accessString){
 	var accessors = accessString.split("+");
 	var retval = "";
@@ -99,153 +293,40 @@ function getStringFromJson(jObject, accessString){
 	}
 	return retval;
 }
-function checkIn(event){
-	var target = getTarget(event);
-	findLocation(sendCheckIn, target.value);
-}
-function sendCheckIn(position, args){
-	var url = 'https://graph.facebook.com/me/checkins?access_token=' + accessToken;
-	url = encodeURI(url);
-	var coords = '{ "latitude": ' + position.coords.latitude + ', "longitude": ' + position.coords.longitude + '}';
-	var data = 'place=' + args[1] + '&coordinates=' + coords; 
-	postFacebook(url, data, "none");	
-}
-function search(){
-	var searchURL = 'https://graph.facebook.com/search?q=' +
-	document.getElementById("searchText").value + '&' +
-	'type=place&' + 
-	'access_token=' + accessToken;
-	getFacebook(searchURL, loadPlaces);	
-}
-</script>
-<!-- List View Functions -->
-<script type="text/javascript">
-function generateTable(data, dataMap){
-	var listhtml = '';
-	for (i = 0; i < data.length; i++){
-		listhtml += '<div style="height:50px;padding:10px" id="placeRow' + i + '" onclick="handleListClick(event)" title=' + data[i].id + '>' + data[i].name + '</div>';
-	}
-	document.getElementById("mainDiv").innerHTML=listhtml;
-	for (i = 0; i < data.length; i++){
-		generateRow(data[i], dataMap, i);
-	}
-}
-function generateRow(data, dataMap, rowIndex){
-	var row = document.getElementById('placeRow' + rowIndex);
-	var rowhtml = "";
-	rowhtml += '<img src="https://graph.facebook.com/' + getValueFromJson(data, dataMap["id"]) + '/picture?type=square"/>';
-	rowhtml += '<h1 style="font-size:20px;position:relative;right:-70px;top:-70px;">' + getValueFromJson(data,dataMap["title"]) + '</h1>';
-	rowhtml += '<p style="font-size:15px;position:relative;right:-70px;top:-75px;">' + getValueFromJson(data,dataMap["details"]) + '</p>';
-	row.innerHTML = rowhtml;
-}
-function generatePaging(pageLinks){
-	if(pageLinks){
-		var next = pageLinks.next;
-		var prev = pageLinks.previous;
-		var paginghtml = "";
-		if(prev){
-			prev += 'access_token=' + accessToken;
-			paginghtml += '<button type="button" onclick="loadNewPlaces(event)" value="' + prev + '">Previous</button>';
-		}
-		if(next){
-			next += 'access_token=' + accessToken;
-			paginghtml += '<button type="button" onclick="loadNewPlaces(event)" value="' + next + '">Next</button>';
-		}
-	document.getElementById("navigationDiv").innerHTML = paginghtml;
-	}
-}
-function loadPlaces(places){
-	var dataMap = new Array();
-	dataMap["id"] = "id";
-	dataMap["title"] = "name";
-	dataMap["details"] = "location.street";
-	generateTable(places.data, dataMap);
-	generatePaging(places.paging);
-}
-function loadPeople(people){
-	var dataMap = new Array();
-	dataMap["id"] = "id";
-	dataMap["title"] = "name";
-	dataMap["details"] = "blank";
-	generateTable(people.data, dataMap);
-	generatePaging(people.paging);
-}
-function handleListClick(event){
-	var target = getTarget(event);
-	var dataMap = new Array();
-	dataMap["id"] = "id";
-	dataMap["name"] = "name";
-	dataMap["hLine1"] = "location.street";
-	dataMap["hLine2"] = "location.city+', '+location.state+', '+location.country";
-	dataMap["details"] = "description";
-	getPageInfo(target.title, dataMap);
-}
-</script>
-<!-- Page View Functions -->
-<script type="text/javascript">
-function getPageInfo(id, dataMap){
-	var requestURL = 'https://graph.facebook.com/' + id;
-	requestURL = encodeURI(requestURL);
-	getFacebook(requestURL, createPageView, dataMap);
-}
-function createPageView(data, args){
-	var dataMap = args[2];
-	generatePageView(data, dataMap);
-	createNavigationButtons(data);
-}
-function generatePageView(data, dataMap){
-	var mainhtml = '<div id="basicInfo" style="position:static;" >';
-	mainhtml += '<img style="position:static;" src="https://graph.facebook.com/' + getValueFromJson(data, dataMap["id"]) + '/picture?type=normal"/>';
-	mainhtml += '<h1 style="font-size:20px;position:absolute;left:120px;top:0px">' + getValueFromJson(data, dataMap["name"]) + '</h1>';
-	var addresshtml = '';
-	mainhtml += '<p style="font-size:15px;position:absolute;left:120px;top:30px;">' + getStringFromJson(data, dataMap["hLine1"]) + '</p>';
-	mainhtml += '<p style="font-size:15px;position:absolute;left:120px;top:50px;">' 
-	mainhtml += '<p style="font-size:15px;position:absolute;left:120px;top:50px;">' + getStringFromJson(data, dataMap["hLine2"]) + '</p></div>'
-	mainhtml += '<div id="details" style="position:static;" >';
-	mainhtml += '<p style="font-size:18px;">' + getStringFromJson(data, dataMap["details"]) + '</p>';
-	mainhtml += '</div>';
-	listhtml = document.getElementById("mainDiv").innerHTML;
-	document.getElementById("mainDiv").innerHTML = mainhtml;
-}
-function createNavigationButtons(place){
-	var navigationhtml = "";
-	navigationhtml += '<button type="button" onclick="backToList()">Back</button>';
-	navigationhtml += '<button type="button" onclick="checkIn(event)" value="' + place.id + '">Check In</button>';
-	paginghtml = document.getElementById("navigationDiv").innerHTML;
-	document.getElementById("navigationDiv").innerHTML = navigationhtml;
-}
-var listhtml;
-var paginghtml;
-function backToList(){
-	document.getElementById("mainDiv").innerHTML = listhtml;
-	document.getElementById("navigationDiv").innerHTML = paginghtml;
-}
-</script>
-<!-- Places Functions -->
-<script type="text/javascript">
-function getPlaces(position){
-	var dist;
-	if (position.coords.accuracy > 1000) dist = position.coords.accuracy;
-	else dist = 1000;
-	document.getElementById("mainDiv").innerHTML='Loading';
-	var requestURL = 'https://graph.facebook.com/search?' +
-	'type=place&' + 
-	'center=' + position.coords.latitude + ',' + position.coords.longitude + '&' +
-	'distance=' + dist + '&' +
-	'limit=25&' + 
-	'format=json&' +
-	'access_token=' + accessToken;
-	getFacebook(requestURL, loadPlaces);
-}
-function loadNewPlaces(event){
-	var target = getTarget(event);
-	getFacebook(target.value, loadPlaces);
-}
-</script>
-<script type="text/javascript">
+
+
 var params = getParams();
 var accessToken = params["access_token"];
-findLocation(getPlaces);	
+
+var lm = new LocationManager();
+var fbHandler = new FacebookHandler(accessToken, lm);
+
+var placeMap = new Array();
+	placeMap["id"] = "id";
+	placeMap["name"] = "name";
+	placeMap["hLine1"] = "location.street";
+	placeMap["hLine2"] = "location.city+', '+location.state+', '+location.country";
+	placeMap["details"] = "description";
+var placeView = new PageView(placeMap, document.getElementById("place"));
+
+var placeRowMap = new Array();
+	placeRowMap["id"] = "id";
+	placeRowMap["title"] = "name";
+	placeRowMap["details"] = "location.street";
+var placeList = new ListView(placeRowMap, document.getElementById("placeList"));
+
+var currentView = placeList;
+var previousView = placeList;
+
+placeList.onItemClick = function(event){
+	var target = getTarget(event);
+	fbHandler.getPage(target.title, placeView.populatePage);
+	(previousView = currentView).hide();
+	(currentView = placesList).show();
+};
+lm.updateLocation(function(){
+	fbHandler.findNearbyPlaces(function(data){placeList.populate(data);});
+});
 </script>
 </body>
 </html>
