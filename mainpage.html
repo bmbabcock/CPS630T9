@@ -23,7 +23,6 @@ function LocationManager(){
 * @param {function} The event handler to call
 */
 LocationManager.prototype.updateLocation = function(responseHandler){
-	lm = this;
 	if (navigator.geolocation){
 		navigator.geolocation.getCurrentPosition(function(position){
 			lm.latitude = position.coords.latitude;
@@ -117,7 +116,7 @@ FacebookHandler.prototype.sendCheckIn = function(position){
 * @param {function} The funciton to handle the response
 */
 FacebookHandler.prototype.getPage = function(id, responseHandler){
-	var url = 'https://graph.facebook.com/id';
+	var url = 'https://graph.facebook.com/' + id;
 	this.sendGet(url, responseHandler);
 };	
 /**
@@ -173,18 +172,17 @@ RowView.prototype.constructor = RowView;
 * @param {array} An associative array used to map the information to the HTML elements.  Must contain values for id, title, details in a format accepted by getStringFromJson.
 * @param {int} The index of the item being added to the view
 */
-RowView.prototype.populate = function(data){
+RowView.prototype.populate = function(data, i){
 	var rowhtml = '<img src="https://graph.facebook.com/' + getValueFromJson(data, this.dataMap["id"]) + '/picture?type=square"/>';
 	rowhtml += '<h1 style="font-size:20px;position:relative;right:-70px;top:-70px;">' + getValueFromJson(data,this.dataMap["title"]) + '</h1>';
 	rowhtml += '<p style="font-size:15px;position:relative;right:-70px;top:-75px;">' + getValueFromJson(data,this.dataMap["details"]) + '</p>';
-	this.div.innerHTML = rowhtml;
+	document.getElementById("placeRow" + i).innerHTML = rowhtml;
 };
 function ListView(dMap, viewDiv){
 	View.call(this);
 	this.dataMap = dMap;
 	this.div = viewDiv;
 	this.rows = new Array();
-	this.onItemClick = new function(event){};
 }
 ListView.prototype = new View();
 ListView.prototype.constructor = ListView;
@@ -200,8 +198,8 @@ ListView.prototype.populate = function(data){
 		var newRow = new RowView(this.dataMap, document.getElementById("placeRow" + i));
 		this.rows[i] = newRow; 
 	}
-	for (i = 0; i < data.length ; i++){
-		this.rows[i].populate(data[i]);
+	for (i = 0; i < data.length; i++){
+		this.rows[i].populate(data[i], i);
 	}
 };
 function PageView(dMap, viewDiv){
@@ -318,11 +316,11 @@ var placeList = new ListView(placeRowMap, document.getElementById("placeList"));
 var currentView = placeList;
 var previousView = placeList;
 
-placeList.onItemClick = function(event){
+function onItemClick(event){
 	var target = getTarget(event);
-	fbHandler.getPage(target.title, placeView.populatePage);
-	(previousView = currentView).hide();
-	(currentView = placesList).show();
+	fbHandler.getPage(target.title, function(data){placeView.populate(data);});
+	document.getElementById("place").style.display = "block";
+	document.getElementById("placeList").style.display = "none";
 };
 lm.updateLocation(function(){
 	fbHandler.findNearbyPlaces(function(data){placeList.populate(data);});
