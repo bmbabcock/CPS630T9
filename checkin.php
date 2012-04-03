@@ -6,7 +6,7 @@ echo ('at: ' . $access_token);
 echo ('id: ' . $id);
 $curl_handle=curl_init();
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-curl_setopt($curl_handle,CURLOPT_URL,'https://graph.facebook.com/checkins?access_token=' + $access_token);
+curl_setopt($curl_handle,CURLOPT_URL,'https://graph.facebook.com/checkins?access_token=' . $access_token);
 
 curl_setopt($curl_handle,CURLOPT_CONNECTTIMEOUT,2);
 curl_setopt($curl_handle,CURLOPT_RETURNTRANSFER,1);
