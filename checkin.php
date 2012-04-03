@@ -2,6 +2,8 @@
 
 $id = $_GET["id"];
 $access_token = $_GET["access_token"];
+print ('id: ' + $id);
+print ('at: ' + $access_token);
 $curl_handle=curl_init();
 curl_setopt($curl_handle,CURLOPT_URL,'https://graph.facebook.com/' + $id + '/checkins?access_token=' + $access_token);
 curl_setopt($curl_handle,CURLOPT_RETURNTRANSFER,1);
