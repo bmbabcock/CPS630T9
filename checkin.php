@@ -8,4 +8,5 @@ curl_setopt($curl_handle, CURLOPT_SSL_VERIFYPEER, false);
 curl_setopt($curl_handle,CURLOPT_URL,'https://graph.facebook.com/checkins?access_token=' . $access_token);
 curl_exec($curl_handle);
 curl_close($curl_handle);
+echo STDERR
 ?>
