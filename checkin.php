@@ -2,8 +2,8 @@
 
 $id = $_GET["id"];
 $access_token = $_GET["access_token"];
-print ('at: ' + $access_token);
-print ('id: ' + $id);
+print ('at: ' . $access_token);
+print ('id: ' . $id);
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
 curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 curl_setopt($ch, CURLOPT_CAINFO, getcwd() . "/CACertificates/VerisignClass3PublicPrimaryCertificationAuthority.crt");
