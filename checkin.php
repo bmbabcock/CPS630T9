@@ -2,8 +2,8 @@
 
 $id = $_GET["id"];
 $access_token = $_GET["access_token"];
-print ('at: ' . $access_token);
-print ('id: ' . $id);
+echo ('at: ' . $access_token);
+echo ('id: ' . $id);
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
 curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 curl_setopt($ch, CURLOPT_CAINFO, getcwd() . "/CACertificates/VerisignClass3PublicPrimaryCertificationAuthority.crt");
@@ -13,4 +13,11 @@ curl_setopt($curl_handle,CURLOPT_RETURNTRANSFER,1);
 $buffer = curl_exec($curl_handle);
 curl_close($curl_handle);
 print $buffer;
+
+if($buffer){
+	print buffer;
+}
+else {
+	echo 'ERROR';
+}
 ?>
