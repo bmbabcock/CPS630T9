@@ -15,7 +15,7 @@
 
 
 --
--- Create schema cps630
+-- Create schema cps1
 --
 
 CREATE DATABASE IF NOT EXISTS cps1;
@@ -47,6 +47,26 @@ CREATE TABLE `checkins` (
 
 
 --
+-- Definition of table `likes`
+--
+
+DROP TABLE IF EXISTS `likes`;
+CREATE TABLE `likes` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `fbid` varchar(45) NOT NULL,
+  `name` varchar(45) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `likes`
+--
+
+/*!40000 ALTER TABLE `likes` DISABLE KEYS */;
+/*!40000 ALTER TABLE `likes` ENABLE KEYS */;
+
+
+--
 -- Definition of table `locations`
 --
 
@@ -67,29 +87,27 @@ CREATE TABLE `locations` (
 
 
 --
--- Definition of table `neighbours`
+-- Definition of table `personlikes`
 --
 
-DROP TABLE IF EXISTS `neighbours`;
-CREATE TABLE `neighbours` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+DROP TABLE IF EXISTS `personlikes`;
+CREATE TABLE `personlikes` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `pid` int(10) unsigned NOT NULL,
-  `nid` int(10) unsigned NOT NULL,
-  `lastUpdateDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `rating` int(10) unsigned NOT NULL,
+  `likeid` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `FK_neighbours_pid` (`pid`),
-  KEY `FK_neighbours_nid` (`nid`),
-  CONSTRAINT `FK_neighbours_pid` FOREIGN KEY (`pid`) REFERENCES `checkins` (`pid`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_neighbours_nid` FOREIGN KEY (`nid`) REFERENCES `checkins` (`pid`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `FK_personlikes` (`likeid`),
+  KEY `FK_personlikes_2` (`pid`),
+  CONSTRAINT `FK_personlikes` FOREIGN KEY (`likeid`) REFERENCES `likes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_personlikes_2` FOREIGN KEY (`pid`) REFERENCES `persons` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Dumping data for table `neighbours`
+-- Dumping data for table `personlikes`
 --
 
-/*!40000 ALTER TABLE `neighbours` DISABLE KEYS */;
-/*!40000 ALTER TABLE `neighbours` ENABLE KEYS */;
+/*!40000 ALTER TABLE `personlikes` DISABLE KEYS */;
+/*!40000 ALTER TABLE `personlikes` ENABLE KEYS */;
 
 
 --
@@ -101,7 +119,8 @@ CREATE TABLE `persons` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `fbid` varchar(45) NOT NULL,
   `name` varchar(64) DEFAULT NULL,
-  `dateCreated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `timeStamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `description` varchar(250) DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -111,6 +130,32 @@ CREATE TABLE `persons` (
 
 /*!40000 ALTER TABLE `persons` DISABLE KEYS */;
 /*!40000 ALTER TABLE `persons` ENABLE KEYS */;
+
+
+--
+-- Definition of table `relationships`
+--
+
+DROP TABLE IF EXISTS `relationships`;
+CREATE TABLE `relationships` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `pid` int(10) unsigned NOT NULL,
+  `nid` int(10) unsigned NOT NULL,
+  `lastUpdateDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `rating` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_neighbours_nid` (`nid`),
+  KEY `FK_neighbours_pid` (`pid`),
+  CONSTRAINT `FK_neighbours_nid` FOREIGN KEY (`nid`) REFERENCES `persons` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_neighbours_pid` FOREIGN KEY (`pid`) REFERENCES `persons` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `relationships`
+--
+
+/*!40000 ALTER TABLE `relationships` DISABLE KEYS */;
+/*!40000 ALTER TABLE `relationships` ENABLE KEYS */;
 
 
 
