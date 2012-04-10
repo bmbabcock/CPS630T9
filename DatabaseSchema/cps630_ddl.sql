@@ -15,11 +15,11 @@
 
 
 --
--- Create schema cps630
+-- Create schema cps1
 --
 
-CREATE DATABASE IF NOT EXISTS cps630;
-USE cps630;
+CREATE DATABASE IF NOT EXISTS cps1;
+USE cps1;
 
 --
 -- Definition of table `checkins`
@@ -118,9 +118,10 @@ DROP TABLE IF EXISTS `persons`;
 CREATE TABLE `persons` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `fbid` varchar(45) NOT NULL,
-  `name` varchar(64) DEFAULT NULL,
+  `fname` varchar(64) DEFAULT NULL,
   `timeStamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `description` varchar(250) DEFAULT NULL,
+  `lname` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
