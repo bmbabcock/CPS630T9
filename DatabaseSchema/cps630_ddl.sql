@@ -15,11 +15,11 @@
 
 
 --
--- Create schema cps1
+-- Create schema cps630
 --
 
-CREATE DATABASE IF NOT EXISTS cps1;
-USE cps1;
+CREATE DATABASE IF NOT EXISTS cps630;
+USE cps630;
 
 --
 -- Definition of table `checkins`
