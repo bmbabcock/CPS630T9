@@ -30,7 +30,7 @@ CREATE TABLE `checkins` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `pid` int(10) unsigned NOT NULL,
   `lid` int(10) unsigned NOT NULL,
-  `timeStamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `checkinTimeStamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `FK_checkins_pid` (`pid`),
   KEY `FK_checkins_lid` (`lid`),
@@ -142,12 +142,15 @@ CREATE TABLE `relationships` (
   `pid` int(10) unsigned NOT NULL,
   `nid` int(10) unsigned NOT NULL,
   `lastUpdateDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `rating` int(10) unsigned NOT NULL,
+  `rating` int(10) unsigned NOT NULL DEFAULT '0',
+  `lid` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `FK_neighbours_nid` (`nid`),
-  KEY `FK_neighbours_pid` (`pid`),
-  CONSTRAINT `FK_neighbours_nid` FOREIGN KEY (`nid`) REFERENCES `persons` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_neighbours_pid` FOREIGN KEY (`pid`) REFERENCES `persons` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  UNIQUE KEY `ux_relationships` (`pid`,`nid`,`lid`),
+  KEY `FK_relationships_2` (`nid`),
+  KEY `FK_relationships_3` (`lid`),
+  CONSTRAINT `FK_relationships_3` FOREIGN KEY (`lid`) REFERENCES `locations` (`id`),
+  CONSTRAINT `FK_relationships_1` FOREIGN KEY (`pid`) REFERENCES `persons` (`id`),
+  CONSTRAINT `FK_relationships_2` FOREIGN KEY (`nid`) REFERENCES `persons` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
